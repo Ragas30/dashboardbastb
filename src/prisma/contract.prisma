@@ -1,0 +1,5 @@
+// use prisma-8
+enum DefectStatus { OPEN ON_PROGRESS COMPLETED }
+enum PicStatus { ACTIVE INACTIVE }
+model MasterPic { id Int @id @default(autoincrement()) name String status PicStatus @default(ACTIVE) createdAt TimestamptzString @default(now()) updatedAt temporal.updatedAtString() defects Defect[] @@map("master_pics") }
+model Defect { id Int @id @default(autoincrement()) projectCluster String unit String defectDate DateString totalDefect Int picId Int pic MasterPic @relation(fields: [picId], references: [id]) targetRepair DateString status DefectStatus @default(OPEN) createdAt TimestamptzString @default(now()) updatedAt temporal.updatedAtString() @@map("defects") }
