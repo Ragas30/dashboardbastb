@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
 import { createDefectSchema } from '@/features/defects/schemas/defect-schema'
 
 describe('createDefectSchema', () => {
@@ -13,6 +14,6 @@ describe('createDefectSchema', () => {
       status: 'OPEN',
     })
 
-    expect(result.success).toBe(false)
+    assert.equal(result.success, false)
   })
 })

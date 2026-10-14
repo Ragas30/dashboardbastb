@@ -1,17 +1,18 @@
-import { describe, expect, it } from 'vitest'
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
 import { assertValidDefectStatus, assertValidDefectTotal } from '@/features/defects/domain/defect-rules'
 
 describe('defect rules', () => {
   it('rejects zero, negative, and fractional totals', () => {
-    expect(() => assertValidDefectTotal(0)).toThrow()
-    expect(() => assertValidDefectTotal(-1)).toThrow()
-    expect(() => assertValidDefectTotal(1.5)).toThrow()
+    assert.throws(() => assertValidDefectTotal(0))
+    assert.throws(() => assertValidDefectTotal(-1))
+    assert.throws(() => assertValidDefectTotal(1.5))
   })
 
   it('accepts only the three PRD statuses', () => {
-    expect(() => assertValidDefectStatus('OPEN')).not.toThrow()
-    expect(() => assertValidDefectStatus('ON_PROGRESS')).not.toThrow()
-    expect(() => assertValidDefectStatus('COMPLETED')).not.toThrow()
-    expect(() => assertValidDefectStatus('CANCELLED')).toThrow()
+    assert.doesNotThrow(() => assertValidDefectStatus('OPEN'))
+    assert.doesNotThrow(() => assertValidDefectStatus('ON_PROGRESS'))
+    assert.doesNotThrow(() => assertValidDefectStatus('COMPLETED'))
+    assert.throws(() => assertValidDefectStatus('CANCELLED'))
   })
 })

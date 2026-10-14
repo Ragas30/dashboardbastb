@@ -1,0 +1,6 @@
+export { createDefect } from './create-defect'
+export { updateDefect } from './update-defect'
+export { deleteDefect } from './delete-defect'
+export { getDefectById } from './get-defect-by-id'
+export { getDefects } from './get-defects'
+export { getDefectSummary } from './get-defect-summary'
