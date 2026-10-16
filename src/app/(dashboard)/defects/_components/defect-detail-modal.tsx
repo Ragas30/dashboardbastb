@@ -8,6 +8,7 @@ import type { Pic } from '@/features/pics/types/pic-types'
 import { DefectDetail } from './defect-detail'
 import { DefectEditModal } from './defect-edit-modal'
 import { DefectStatusModal } from './defect-status-modal'
+import { DefectFilesSection } from './defect-files-section'
 
 const actionClass = 'rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50'
 
@@ -25,6 +26,7 @@ export function DefectDetailModal({
       {() => (
         <div className="space-y-6">
           <DefectDetail defect={defect} />
+          <DefectFilesSection defectId={defect.id} />
           <div className="flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-4">
             <DefectEditModal defect={defect} pics={pics} buttonClassName={actionClass} />
             <DefectStatusModal id={defect.id} status={defect.status} />

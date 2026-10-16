@@ -1595,6 +1595,45 @@ Official documentation:
 
 ---
 
+# Tambahan Setelah PRD Selesai — Lampiran PDF Defect
+
+> Fitur di bawah ini ditambahkan setelah seluruh ruang lingkup PRD selesai diimplementasikan. PRD awal tidak memuat lampiran file.
+
+## T1. Ringkasan
+
+Setiap defect dapat memiliki banyak lampiran PDF, dikelompokkan menjadi dua tahap pengerjaan:
+
+- `BEFORE` — Sebelum Dikerjakan (kondisi awal).
+- `AFTER` — Sesudah Dikerjakan (bukti perbaikan).
+
+## T2. Aturan
+
+- Lampiran bersifat opsional.
+- Format hanya PDF (`application/pdf`), maksimal 5 MB per file.
+- Jumlah lampiran tidak dibatasi.
+- Bucket Storage private; akses lewat signed URL berumur pendek.
+- Upload/hapus dilakukan dari modal Detail defect, bukan form Tambah/Edit.
+- Menghapus defect ikut menghapus seluruh lampirannya (Storage + baris tabel).
+
+## T3. Database & Storage
+
+- Tabel `defect_files` (`id`, `defect_id` FK `on delete cascade`, `stage` enum, `file_path`, `file_name`, `file_size`, `created_at`) dengan RLS untuk `authenticated`.
+- Bucket private `defect-files` (limit 5 MB, mime PDF) + policy `storage.objects` (select/insert/delete untuk `authenticated`).
+- Migration: `supabase/migrations/20261016000100_defect_files.sql`.
+
+## T4. Arsitektur
+
+- Domain: `defect-file-stage.ts`, `defect-file-rules.ts` (validasi PDF dan ukuran).
+- Application: contract `DefectFileRepository`, use case `getDefectFiles`, `uploadDefectFile`, `deleteDefectFile`.
+- Infrastructure: `SupabaseDefectFileRepository` (Storage + tabel) dan `pdf-compression.ts` (seam kompresi PDF untuk file besar, saat ini no-op).
+- Entry: Server Actions `listDefectFilesAction`, `uploadDefectFileAction`, `deleteDefectFileAction`.
+- UI: `defect-files-section.tsx` dan `defect-file-upload.tsx` di dalam modal Detail.
+- Batas body Server Action dinaikkan ke `6mb` lewat `experimental.serverActions.bodySizeLimit` agar PDF 5 MB dapat diunggah.
+
+Catatan: penambahan modul Storage ini menyimpang dari batasan migration Supabase sebelumnya ("tanpa modul Storage") karena menjadi permintaan eksplisit setelah PRD selesai.
+
+---
+
 # 71. Agent Work Log and Recovery Rules
 
 Setiap coding agent wajib menjaga catatan kerja lokal agar pekerjaan dapat dilanjutkan jika proses terhenti.

@@ -1,4 +1,15 @@
 import type { DefectStatus } from '../domain/defect-status'
+import type { DefectFileStage } from '../domain/defect-file-stage'
+
+export type DefectFile = {
+  id: number
+  defectId: number
+  stage: DefectFileStage
+  fileName: string
+  fileSize: number
+  createdAt: Date
+  signedUrl: string | null
+}
 
 export type Defect = {
   id: number
