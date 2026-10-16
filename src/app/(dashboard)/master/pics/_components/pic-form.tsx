@@ -1,11 +1,75 @@
-import { createPicAction, updatePicAction } from '@/app/actions/pic-actions'
+'use client'
+
+import { useActionState } from 'react'
+import { createPicAction, updatePicAction, type ActionResult } from '@/app/actions/pic-actions'
 import type { Pic } from '@/features/pics/types/pic-types'
 
-export function PicForm({ pic }: { pic?: Pic }) {
-  return <form action={pic ? updatePicAction : createPicAction} className="flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    {pic && <input type="hidden" name="id" value={pic.id} />}
-    <label className="min-w-56 flex-1 text-sm font-medium">Nama PIC<input required name="name" defaultValue={pic?.name} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-    <label className="text-sm font-medium">Status<select name="status" defaultValue={pic?.status ?? 'ACTIVE'} className="mt-2 rounded-lg border border-slate-300 px-3 py-2"><option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option></select></label>
-    <button className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white" type="submit">{pic ? 'Simpan' : 'Tambah PIC'}</button>
-  </form>
+export function PicForm({
+  pic,
+  onSuccess,
+  onCancel,
+}: {
+  pic?: Pic
+  onSuccess?: () => void
+  onCancel?: () => void
+}) {
+  const action = pic ? updatePicAction : createPicAction
+  const [state, formAction, pending] = useActionState<ActionResult, FormData>(
+    async (_previous, formData) => {
+      const result = await action(formData)
+      if (result.ok) onSuccess?.()
+      return result
+    },
+    { ok: true },
+  )
+
+  const inputClass = 'mt-2 w-full rounded-lg border border-slate-300 px-3 py-2'
+
+  return (
+    <form action={formAction} className="space-y-5">
+      <label className="block text-sm font-medium text-slate-600">
+        Nama PIC
+        <input name="name" required defaultValue={pic?.name} className={inputClass} />
+      </label>
+      <label className="block text-sm font-medium text-slate-600">
+        Status
+        <select name="status" defaultValue={pic?.status ?? 'ACTIVE'} className={inputClass}>
+          <option value="ACTIVE">Active</option>
+          <option value="INACTIVE">Inactive</option>
+        </select>
+      </label>
+
+      {!state.ok && (
+        <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <p>{state.message}</p>
+          {state.fieldErrors && (
+            <ul className="mt-1 list-disc pl-5">
+              {Object.values(state.fieldErrors).flat().map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          >
+            Batal
+          </button>
+        )}
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-lg bg-slate-700 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+        >
+          {pending ? 'Menyimpan...' : pic ? 'Simpan Perubahan' : 'Simpan'}
+        </button>
+      </div>
+    </form>
+  )
 }

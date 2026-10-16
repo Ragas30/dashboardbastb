@@ -3,7 +3,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PicRepository } from '../application/pic-repository'
 import type { Pic, PicInput } from '../types/pic-types'
 
-function mapPic(row: any): Pic {
+type PicRow = { id: number; name: string; status: Pic['status']; created_at: string; updated_at: string }
+
+function mapPic(row: PicRow): Pic {
   return { id: row.id, name: row.name, status: row.status, createdAt: new Date(row.created_at), updatedAt: new Date(row.updated_at) }
 }
 

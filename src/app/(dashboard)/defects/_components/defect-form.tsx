@@ -1,22 +1,114 @@
+'use client'
+
+import { useActionState } from 'react'
 import type { Pic } from '@/features/pics/types/pic-types'
-import { createDefectAction, updateDefectAction } from '@/app/actions/defect-actions'
+import { createDefectAction, updateDefectAction, type ActionResult } from '@/app/actions/defect-actions'
 import type { Defect } from '@/features/defects/types/defect-types'
 
-function dateValue(value: Date | undefined) { return value ? value.toISOString().slice(0, 10) : '' }
+function dateValue(value: Date | undefined) {
+  return value ? value.toISOString().slice(0, 10) : ''
+}
 
-export function DefectForm({ defect, pics }: { defect?: Defect; pics: Pic[] }) {
+export function DefectForm({
+  defect,
+  pics,
+  onSuccess,
+  onCancel,
+}: {
+  defect?: Defect
+  pics: Pic[]
+  onSuccess?: () => void
+  onCancel?: () => void
+}) {
   const action = defect ? updateDefectAction : createDefectAction
-  return <form action={action} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-    {defect && <input type="hidden" name="id" value={defect.id} />}
-    <div className="grid gap-5 sm:grid-cols-2">
-      <label className="text-sm font-medium">Project / Cluster<input required name="projectCluster" defaultValue={defect?.projectCluster} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-      <label className="text-sm font-medium">Unit<input required name="unit" defaultValue={defect?.unit} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-      <label className="text-sm font-medium">Tanggal<input required type="date" name="defectDate" defaultValue={dateValue(defect?.defectDate)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-      <label className="text-sm font-medium">Total Defect<input required min="1" type="number" name="totalDefect" defaultValue={defect?.totalDefect ?? 1} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-      <label className="text-sm font-medium">PIC<select required name="picId" defaultValue={defect?.picId} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Pilih PIC</option>{pics.filter((pic) => pic.status === 'ACTIVE' || pic.id === defect?.picId).map((pic) => <option key={pic.id} value={pic.id}>{pic.name}</option>)}</select></label>
-      <label className="text-sm font-medium">Target Repair<input required type="date" name="targetRepair" defaultValue={dateValue(defect?.targetRepair)} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
-      <label className="text-sm font-medium sm:col-span-2">Status<select name="status" defaultValue={defect?.status ?? 'OPEN'} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="OPEN">Open</option><option value="ON_PROGRESS">On Progress</option><option value="COMPLETED">Completed</option></select></label>
-    </div>
-    <button className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white" type="submit">{defect ? 'Simpan Perubahan' : 'Simpan Defect'}</button>
-  </form>
+  const [state, formAction, pending] = useActionState<ActionResult, FormData>(
+    async (_previous, formData) => {
+      const result = await action(formData)
+      if (result.ok) onSuccess?.()
+      return result
+    },
+    { ok: true },
+  )
+
+  const inputClass = 'mt-2 w-full rounded-lg border border-slate-300 px-3 py-2'
+
+  return (
+    <form action={formAction} className="space-y-5">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <label className="text-sm font-medium text-slate-600">
+          Project / Cluster
+          <input name="projectCluster" required defaultValue={defect?.projectCluster} className={inputClass} />
+        </label>
+        <label className="text-sm font-medium text-slate-600">
+          Unit
+          <input name="unit" required defaultValue={defect?.unit} className={inputClass} />
+        </label>
+        <label className="text-sm font-medium text-slate-600">
+          Tanggal
+          <input type="date" name="defectDate" required defaultValue={dateValue(defect?.defectDate)} className={inputClass} />
+        </label>
+        <label className="text-sm font-medium text-slate-600">
+          Total Defect
+          <input type="number" name="totalDefect" required min={1} defaultValue={defect?.totalDefect ?? 1} className={inputClass} />
+        </label>
+        <label className="text-sm font-medium text-slate-600">
+          PIC
+          <select name="picId" required defaultValue={defect?.picId} className={inputClass}>
+            <option value="">Pilih PIC</option>
+            {pics
+              .filter((pic) => pic.status === 'ACTIVE' || pic.id === defect?.picId)
+              .map((pic) => (
+                <option key={pic.id} value={pic.id}>
+                  {pic.name}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label className="text-sm font-medium text-slate-600">
+          Target Repair
+          <input type="date" name="targetRepair" required defaultValue={dateValue(defect?.targetRepair)} className={inputClass} />
+        </label>
+        <label className="text-sm font-medium text-slate-600 sm:col-span-2">
+          Status
+          <select name="status" defaultValue={defect?.status ?? 'OPEN'} className={inputClass}>
+            <option value="OPEN">Open</option>
+            <option value="ON_PROGRESS">On Progress</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </label>
+      </div>
+
+      {!state.ok && (
+        <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <p>{state.message}</p>
+          {state.fieldErrors && (
+            <ul className="mt-1 list-disc pl-5">
+              {Object.values(state.fieldErrors).flat().map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          >
+            Batal
+          </button>
+        )}
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-lg bg-slate-700 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+        >
+          {pending ? 'Menyimpan...' : defect ? 'Simpan Perubahan' : 'Simpan'}
+        </button>
+      </div>
+    </form>
+  )
 }

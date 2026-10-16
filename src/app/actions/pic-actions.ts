@@ -8,7 +8,7 @@ import { createPicRepository } from '@/features/pics/application/factories'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { AppError, BusinessRuleError } from '@/lib/errors'
 
-type ActionResult = { ok: true } | { ok: false; message: string; fieldErrors?: Record<string, string[]> }
+export type ActionResult = { ok: true } | { ok: false; message: string; fieldErrors?: Record<string, string[]> }
 
 async function requireUser() {
   const client = await createSupabaseServerClient()
@@ -27,7 +27,7 @@ export async function createPicAction(formData: FormData): Promise<ActionResult>
     const parsed = createPicSchema.safeParse(Object.fromEntries(formData))
     if (!parsed.success) return { ok: false, message: 'Periksa data PIC.', fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
     await createPic(await createPicRepository(), parsed.data)
-    revalidatePath('/master/pics'); revalidatePath('/defects/new')
+    revalidatePath('/master/pics'); revalidatePath('/defects')
     return { ok: true }
   } catch (error) { return failure(error) }
 }
@@ -38,7 +38,7 @@ export async function updatePicAction(formData: FormData): Promise<ActionResult>
     const parsed = updatePicSchema.safeParse(Object.fromEntries(formData))
     if (!parsed.success) return { ok: false, message: 'Periksa data PIC.', fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
     await updatePic(await createPicRepository(), parsed.data)
-    revalidatePath('/master/pics'); revalidatePath('/defects/new')
+    revalidatePath('/master/pics'); revalidatePath('/defects')
     return { ok: true }
   } catch (error) { return failure(error) }
 }

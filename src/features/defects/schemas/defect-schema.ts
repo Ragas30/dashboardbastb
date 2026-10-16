@@ -13,5 +13,10 @@ const defectFields = {
 
 export const createDefectSchema = z.object(defectFields)
 export const updateDefectSchema = createDefectSchema.extend({ id: z.coerce.number().int().positive() })
+export const updateDefectStatusSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  status: z.enum(DEFECT_STATUSES),
+})
 export type CreateDefectInput = z.infer<typeof createDefectSchema>
 export type UpdateDefectInput = z.infer<typeof updateDefectSchema>
+export type UpdateDefectStatusInput = z.infer<typeof updateDefectStatusSchema>

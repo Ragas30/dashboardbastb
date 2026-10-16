@@ -1,13 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createDefectSchema, updateDefectSchema } from '@/features/defects/schemas/defect-schema'
-import { createDefect, deleteDefect, updateDefect } from '@/features/defects/application'
+import { createDefectSchema, updateDefectSchema, updateDefectStatusSchema } from '@/features/defects/schemas/defect-schema'
+import { createDefect, deleteDefect, updateDefect, updateDefectStatus } from '@/features/defects/application'
 import { createDefectRepository } from '@/features/defects/application/factories'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { AppError, BusinessRuleError } from '@/lib/errors'
 
-type ActionResult = { ok: true } | { ok: false; message: string; fieldErrors?: Record<string, string[]> }
+export type ActionResult = { ok: true } | { ok: false; message: string; fieldErrors?: Record<string, string[]> }
 
 async function requireUser() {
   const client = await createSupabaseServerClient()
@@ -37,7 +37,18 @@ export async function updateDefectAction(formData: FormData): Promise<ActionResu
     const parsed = updateDefectSchema.safeParse(Object.fromEntries(formData))
     if (!parsed.success) return { ok: false, message: 'Periksa data defect.', fieldErrors: parsed.error.flatten().fieldErrors as Record<string, string[]> }
     await updateDefect(await createDefectRepository(), parsed.data)
-    revalidatePath('/dashboard'); revalidatePath('/defects'); revalidatePath(`/defects/${parsed.data.id}`)
+    revalidatePath('/dashboard'); revalidatePath('/defects')
+    return { ok: true }
+  } catch (error) { return failure(error) }
+}
+
+export async function updateDefectStatusAction(formData: FormData): Promise<ActionResult> {
+  try {
+    await requireUser()
+    const parsed = updateDefectStatusSchema.safeParse(Object.fromEntries(formData))
+    if (!parsed.success) return { ok: false, message: 'Status defect tidak valid.' }
+    await updateDefectStatus(await createDefectRepository(), parsed.data)
+    revalidatePath('/dashboard'); revalidatePath('/defects')
     return { ok: true }
   } catch (error) { return failure(error) }
 }

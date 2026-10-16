@@ -3,7 +3,19 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DefectRepository } from '../application/defect-repository'
 import type { Defect, DefectFilters, DefectInput, DefectSummary } from '../types/defect-types'
 
-type DefectRow = Record<string, any>
+type DefectRow = {
+  id: number
+  project_cluster: string
+  unit: string
+  defect_date: string
+  total_defect: number
+  pic_id: number
+  target_repair: string
+  status: Defect['status']
+  created_at: string
+  updated_at: string
+  master_pics?: { id: number; name: string; status: 'ACTIVE' | 'INACTIVE' } | null
+}
 
 function mapDefect(row: DefectRow): Defect {
   return {
@@ -19,7 +31,7 @@ export class SupabaseDefectRepository implements DefectRepository {
   constructor(private readonly client: SupabaseClient) {}
 
   async list(filters: DefectFilters) {
-    let query: any = this.client.from('defects').select('*, master_pics!inner(id,name,status)', { count: 'exact' })
+    let query = this.client.from('defects').select('*, master_pics!inner(id,name,status)', { count: 'exact' })
     if (filters.projectCluster) query = query.eq('project_cluster', filters.projectCluster)
     if (filters.unit) query = query.eq('unit', filters.unit)
     if (filters.picId) query = query.eq('pic_id', filters.picId)
