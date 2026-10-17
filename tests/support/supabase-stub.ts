@@ -48,6 +48,10 @@ export function createSupabaseStub(handler: (descriptor: QueryDescriptor) => Que
         operations.push({ method: 'order', args })
         return builder
       },
+      limit(...args: unknown[]) {
+        operations.push({ method: 'limit', args })
+        return builder
+      },
       range(...args: unknown[]) {
         operations.push({ method: 'range', args })
         return builder

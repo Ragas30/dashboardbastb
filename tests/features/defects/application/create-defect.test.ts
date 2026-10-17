@@ -14,6 +14,7 @@ function repository(picStatus: 'ACTIVE' | 'INACTIVE' = 'ACTIVE'): DefectReposito
   return {
     list: async () => ({ items: [], total: 0 }), findById: async () => null,
     findPicById: async () => ({ id: 1, name: 'Andi', status: picStatus }),
+    findPicByName: async () => ({ id: 1, name: 'Andi', status: picStatus }),
     create: async (value) => ({ ...defect, ...value }), update: async () => defect,
     delete: async () => {}, summary: async () => ({ total: 0, open: 0, onProgress: 0, completed: 0 }),
   }

@@ -7,6 +7,7 @@ import {
   deleteDefect,
   deleteDefectFile,
   getDefectFiles,
+  importDefects,
   updateDefect,
   updateDefectStatus,
   uploadDefectFile,
@@ -14,12 +15,17 @@ import {
 import { createDefectFileRepository, createDefectRepository } from '@/features/defects/application/factories'
 import { compressDefectPdf } from '@/features/defects/infrastructure/pdf-compression'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { parseCsv, rowsToRecords } from '@/lib/csv'
 import { AppError, BusinessRuleError } from '@/lib/errors'
 import type { DefectFile } from '@/features/defects/types/defect-types'
+import type { DefectImportRowError } from '@/features/defects/application/import-defects'
 
 export type ActionResult = { ok: true } | { ok: false; message: string; fieldErrors?: Record<string, string[]> }
 export type DefectFileResult = { ok: true; file: DefectFile } | { ok: false; message: string }
 export type DefectFilesResult = { ok: true; files: DefectFile[] } | { ok: false; message: string }
+export type DefectImportActionResult =
+  | { ok: true; created: number; errors: DefectImportRowError[] }
+  | { ok: false; message: string }
 
 async function requireUser() {
   const client = await createSupabaseServerClient()
@@ -117,4 +123,18 @@ export async function deleteDefectFileAction(formData: FormData): Promise<Action
     revalidatePath('/defects')
     return { ok: true }
   } catch (error) { return failure(error) }
+}
+
+export async function importDefectsAction(formData: FormData): Promise<DefectImportActionResult> {
+  try {
+    await requireUser()
+    const file = formData.get('file')
+    if (!(file instanceof File) || file.size === 0) return { ok: false, message: 'Pilih file CSV terlebih dahulu.' }
+    if (file.size > 2_000_000) return { ok: false, message: 'Ukuran file maksimal 2 MB.' }
+    const records = rowsToRecords(parseCsv(await file.text()))
+    if (records.length === 0) return { ok: false, message: 'File CSV kosong atau tidak memiliki data.' }
+    const result = await importDefects(await createDefectRepository(), records)
+    revalidatePath('/dashboard'); revalidatePath('/defects')
+    return { ok: true, created: result.created, errors: result.errors }
+  } catch (error) { return { ok: false, message: messageOf(error) } }
 }

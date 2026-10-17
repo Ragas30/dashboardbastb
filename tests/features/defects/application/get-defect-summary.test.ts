@@ -11,6 +11,7 @@ describe('getDefectSummary', () => {
       list: async () => ({ items: [], total: 0 }),
       findById: async () => null,
       findPicById: async () => null,
+    findPicByName: async () => null,
       create: async () => ({ id: 1 } as Defect),
       update: async () => ({ id: 1 } as Defect),
       delete: async () => {},

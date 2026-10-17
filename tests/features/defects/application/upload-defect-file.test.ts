@@ -36,6 +36,7 @@ function defectRepository(exists: boolean): DefectRepository {
     list: async () => ({ items: [], total: 0 }),
     findById: async () => (exists ? defect : null),
     findPicById: async () => null,
+    findPicByName: async () => null,
     create: async () => defect,
     update: async () => defect,
     delete: async () => {},

@@ -17,6 +17,7 @@ function repository(existing: Defect | null) {
     list: async () => ({ items: [], total: 0 }),
     findById: async () => existing,
     findPicById: async () => null,
+    findPicByName: async () => null,
     create: async () => existing ?? defect,
     update: async (id, input) => { captured = { id, input }; return { ...defect, ...input, id } },
     delete: async () => {},

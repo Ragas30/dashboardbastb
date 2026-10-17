@@ -9,6 +9,8 @@ import { Pagination } from '@/components/shared/pagination'
 import { DefectCreateModal } from './_components/defect-create-modal'
 import { DefectDetailModal } from './_components/defect-detail-modal'
 import { DefectEditModal } from './_components/defect-edit-modal'
+import { DefectExportButtons } from './_components/defect-export-buttons'
+import { DefectImportModal } from './_components/defect-import-modal'
 import { DefectStatusBadge } from '@/components/shared/defect-status-badge'
 
 const PAGE_SIZE = 10
@@ -31,14 +33,20 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
     return suffix ? `/defects?${suffix}` : '/defects'
   }
 
+  const exportQuery = search ? new URLSearchParams({ search }).toString() : ''
+
   return (
     <section className="p-6 sm:p-10">
-      <div className="mb-8 flex items-end justify-between gap-4">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-slate-500">Pencatatan dan monitoring</p>
           <h1 className="text-3xl font-bold tracking-tight text-slate-700">List Defect</h1>
         </div>
-        <DefectCreateModal pics={pics} />
+        <div className="flex flex-wrap items-center gap-2">
+          <DefectExportButtons query={exportQuery} />
+          <DefectImportModal />
+          <DefectCreateModal pics={pics} />
+        </div>
       </div>
 
       <form className="mb-4 flex gap-2">

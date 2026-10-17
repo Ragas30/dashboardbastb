@@ -23,7 +23,17 @@ export const uploadDefectFileSchema = z.object({
   defectId: z.coerce.number().int().positive('ID defect tidak valid.'),
   stage: defectFileStageSchema,
 })
+export const defectImportRowSchema = z.object({
+  projectCluster: z.string().trim().min(1, 'Project / Cluster wajib diisi.'),
+  unit: z.string().trim().min(1, 'Unit wajib diisi.'),
+  defectDate: z.date({ message: 'Tanggal defect tidak valid.' }),
+  totalDefect: z.coerce.number().int().min(1, 'Total defect minimal 1.'),
+  picName: z.string().trim().min(1, 'PIC wajib diisi.'),
+  targetRepair: z.date({ message: 'Target repair tidak valid.' }),
+  status: z.enum(DEFECT_STATUSES),
+})
 export type CreateDefectInput = z.infer<typeof createDefectSchema>
 export type UpdateDefectInput = z.infer<typeof updateDefectSchema>
 export type UpdateDefectStatusInput = z.infer<typeof updateDefectStatusSchema>
 export type UploadDefectFileInput = z.infer<typeof uploadDefectFileSchema>
+export type DefectImportRowInput = z.infer<typeof defectImportRowSchema>

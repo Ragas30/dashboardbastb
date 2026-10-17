@@ -64,6 +64,12 @@ export class SupabaseDefectRepository implements DefectRepository {
     return data
   }
 
+  async findPicByName(name: string) {
+    const { data, error } = await this.client.from('master_pics').select('id,name,status').ilike('name', name).order('id', { ascending: true }).limit(1).maybeSingle()
+    if (error) throw new InfrastructureError('Gagal memeriksa PIC.', error)
+    return data
+  }
+
   async create(input: DefectInput) {
     const { data, error } = await this.client.from('defects').insert({
       project_cluster: input.projectCluster, unit: input.unit, defect_date: input.defectDate.toISOString().slice(0, 10),
