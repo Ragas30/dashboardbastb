@@ -5,6 +5,7 @@ import type { Defect, DefectFilters, DefectInput, DefectSummary } from '../types
 
 type DefectRow = {
   id: number
+  bastb_id?: number | null
   project_cluster: string
   unit: string
   defect_date: string
@@ -19,7 +20,7 @@ type DefectRow = {
 
 function mapDefect(row: DefectRow): Defect {
   return {
-    id: row.id, projectCluster: row.project_cluster, unit: row.unit,
+    id: row.id, bastbId: row.bastb_id ?? undefined, projectCluster: row.project_cluster, unit: row.unit,
     defectDate: new Date(row.defect_date), totalDefect: row.total_defect,
     picId: row.pic_id, targetRepair: new Date(row.target_repair), status: row.status,
     createdAt: new Date(row.created_at), updatedAt: new Date(row.updated_at),
@@ -34,6 +35,7 @@ export class SupabaseDefectRepository implements DefectRepository {
     let query = this.client.from('defects').select('*, master_pics!inner(id,name,status)', { count: 'exact' })
     if (filters.projectCluster) query = query.eq('project_cluster', filters.projectCluster)
     if (filters.unit) query = query.eq('unit', filters.unit)
+    if (filters.bastbId) query = query.eq('bastb_id', filters.bastbId)
     if (filters.picId) query = query.eq('pic_id', filters.picId)
     if (filters.status) query = query.eq('status', filters.status)
     if (filters.defectDateFrom) query = query.gte('defect_date', filters.defectDateFrom.toISOString().slice(0, 10))
@@ -72,7 +74,7 @@ export class SupabaseDefectRepository implements DefectRepository {
 
   async create(input: DefectInput) {
     const { data, error } = await this.client.from('defects').insert({
-      project_cluster: input.projectCluster, unit: input.unit, defect_date: input.defectDate.toISOString().slice(0, 10),
+      bastb_id: input.bastbId ?? null, project_cluster: input.projectCluster, unit: input.unit, defect_date: input.defectDate.toISOString().slice(0, 10),
       total_defect: input.totalDefect, pic_id: input.picId, target_repair: input.targetRepair.toISOString().slice(0, 10), status: input.status,
     }).select('*, master_pics!inner(id,name,status)').single()
     if (error) throw new InfrastructureError('Gagal menyimpan defect.', error)
@@ -81,7 +83,7 @@ export class SupabaseDefectRepository implements DefectRepository {
 
   async update(id: number, input: DefectInput) {
     const { data, error } = await this.client.from('defects').update({
-      project_cluster: input.projectCluster, unit: input.unit, defect_date: input.defectDate.toISOString().slice(0, 10),
+      bastb_id: input.bastbId ?? null, project_cluster: input.projectCluster, unit: input.unit, defect_date: input.defectDate.toISOString().slice(0, 10),
       total_defect: input.totalDefect, pic_id: input.picId, target_repair: input.targetRepair.toISOString().slice(0, 10), status: input.status,
     }).eq('id', id).select('*, master_pics!inner(id,name,status)').maybeSingle()
     if (error) throw new InfrastructureError('Gagal memperbarui defect.', error)

@@ -3,6 +3,7 @@ import { DEFECT_STATUSES } from '../domain/defect-status'
 import { DEFECT_FILE_STAGES } from '../domain/defect-file-stage'
 
 const defectFields = {
+  bastbId: z.coerce.number().int().positive('BASTB wajib dipilih.').optional(),
   projectCluster: z.string().trim().min(1, 'Project / Cluster wajib diisi.'),
   unit: z.string().trim().min(1, 'Unit wajib diisi.'),
   defectDate: z.coerce.date({ message: 'Tanggal defect tidak valid.' }),

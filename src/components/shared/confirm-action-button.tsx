@@ -21,7 +21,7 @@ export function ConfirmActionButton({
   confirmLabel?: string
   action: (formData: FormData) => Promise<ActionResultLike>
   hiddenFields?: Record<string, string | number>
-  buttonClassName?: string
+  buttonClassName?: string  
   confirmClassName?: string
 }) {
   const [open, setOpen] = useState(false)

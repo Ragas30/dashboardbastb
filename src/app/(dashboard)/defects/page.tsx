@@ -12,6 +12,7 @@ import { DefectEditModal } from './_components/defect-edit-modal'
 import { DefectExportButtons } from './_components/defect-export-buttons'
 import { DefectImportModal } from './_components/defect-import-modal'
 import { DefectStatusBadge } from '@/components/shared/defect-status-badge'
+import { getBastbs, getAvailableBastbsForDefect, createBastbRepository } from '@/features/bastbs/application'
 
 const PAGE_SIZE = 10
 
@@ -20,9 +21,11 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
   const params = await searchParams
   const search = typeof params.search === 'string' ? params.search : undefined
   const page = Math.max(1, Number(params.page) || 1)
-  const [result, pics] = await Promise.all([
+  const [result, pics, bastbs, availableBastbs] = await Promise.all([
     getDefects(await createDefectRepository(), { search, page, pageSize: PAGE_SIZE }),
     getPics(await createPicRepository()),
+    getBastbs(await createBastbRepository()),
+    getAvailableBastbsForDefect(await createBastbRepository()),
   ])
 
   const buildPageHref = (target: number) => {
@@ -45,7 +48,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
         <div className="flex flex-wrap items-center gap-2">
           <DefectExportButtons query={exportQuery} />
           <DefectImportModal />
-          <DefectCreateModal pics={pics} />
+          <DefectCreateModal pics={pics} bastbs={availableBastbs} />
         </div>
       </div>
 
@@ -58,7 +61,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
         {result.items.length === 0 ? (
           <div className="flex flex-col items-center gap-4 p-10 text-center text-sm text-slate-500">
             <p>Belum ada data defect.</p>
-            <DefectCreateModal pics={pics} />
+            <DefectCreateModal pics={pics} bastbs={availableBastbs} />
           </div>
         ) : (
           <table className="w-full min-w-[960px] text-left text-sm">
@@ -89,7 +92,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
                   <td className="py-4">
                     <div className="flex items-center gap-3">
                       <DefectDetailModal defect={defect} pics={pics} />
-                      <DefectEditModal defect={defect} pics={pics} />
+                      <DefectEditModal defect={defect} pics={pics} bastbs={bastbs} />
                       <ConfirmActionButton
                         label="Hapus"
                         title="Hapus Defect"

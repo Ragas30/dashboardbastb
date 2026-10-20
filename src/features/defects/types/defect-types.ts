@@ -13,6 +13,7 @@ export type DefectFile = {
 
 export type Defect = {
   id: number
+  bastbId?: number
   projectCluster: string
   unit: string
   defectDate: Date
@@ -26,6 +27,7 @@ export type Defect = {
 }
 
 export type DefectFilters = {
+  bastbId?: number
   search?: string
   projectCluster?: string
   unit?: string

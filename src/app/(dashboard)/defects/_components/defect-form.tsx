@@ -1,9 +1,10 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import type { Pic } from '@/features/pics/types/pic-types'
 import { createDefectAction, updateDefectAction, type ActionResult } from '@/app/actions/defect-actions'
 import type { Defect } from '@/features/defects/types/defect-types'
+import type { Bastb } from '@/features/bastbs/types/bastb-types'
 
 function dateValue(value: Date | undefined) {
   return value ? value.toISOString().slice(0, 10) : ''
@@ -12,14 +13,19 @@ function dateValue(value: Date | undefined) {
 export function DefectForm({
   defect,
   pics,
+  bastbs = [],
   onSuccess,
   onCancel,
 }: {
   defect?: Defect
   pics: Pic[]
+  bastbs?: Bastb[]
   onSuccess?: () => void
   onCancel?: () => void
 }) {
+  const selectedBastb = bastbs.find((item) => item.id === defect?.bastbId)
+  const [cluster, setCluster] = useState(defect?.projectCluster ?? selectedBastb?.cluster ?? '')
+  const [unit, setUnit] = useState(defect?.unit ?? selectedBastb?.noUnit ?? '')
   const action = defect ? updateDefectAction : createDefectAction
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_previous, formData) => {
@@ -35,13 +41,20 @@ export function DefectForm({
   return (
     <form action={formAction} className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
+        <label className="text-sm font-medium text-slate-600 sm:col-span-2">
+          BASTB
+          <select name="bastbId" required={!defect} defaultValue={defect?.bastbId ?? ''} className={inputClass} onChange={(event) => { const item = bastbs.find((candidate) => candidate.id === Number(event.target.value)); setCluster(item?.cluster ?? ''); setUnit(item?.noUnit ?? '') }}>
+            <option value="">Pilih BASTB</option>
+            {bastbs.map((item) => <option key={item.id} value={item.id}>{item.cluster} - {item.noUnit} - {item.bastbDate.toLocaleDateString('id-ID')}</option>)}
+          </select>
+        </label>
         <label className="text-sm font-medium text-slate-600">
           Project / Cluster
-          <input name="projectCluster" required defaultValue={defect?.projectCluster} className={inputClass} />
+          <input name="projectCluster" required value={cluster} readOnly className={`${inputClass} bg-slate-50`} />
         </label>
         <label className="text-sm font-medium text-slate-600">
           Unit
-          <input name="unit" required defaultValue={defect?.unit} className={inputClass} />
+          <input name="unit" required value={unit} readOnly className={`${inputClass} bg-slate-50`} />
         </label>
         <label className="text-sm font-medium text-slate-600">
           Tanggal
