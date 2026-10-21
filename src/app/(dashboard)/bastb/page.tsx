@@ -1,6 +1,7 @@
 import { getBastbs, createBastbRepository } from '@/features/bastbs/application'
 import { requireSupabaseUser } from '@/lib/supabase/auth'
 import { BastbListClient } from './_components/bastb-list-client'
+import { BastbModal } from './_components/bastb-modal'
 
 export default async function BastbPage() {
   await requireSupabaseUser()
