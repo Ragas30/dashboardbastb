@@ -13,6 +13,7 @@ import { DefectExportButtons } from './_components/defect-export-buttons'
 import { DefectImportModal } from './_components/defect-import-modal'
 import { DefectStatusBadge } from '@/components/shared/defect-status-badge'
 import { getBastbs, getAvailableBastbsForDefect, createBastbRepository } from '@/features/bastbs/application'
+import { DefectSearch } from './_components/defect-search'
 
 const PAGE_SIZE = 10
 
@@ -52,10 +53,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
         </div>
       </div>
 
-      <form className="mb-4 flex gap-2">
-        <input className="w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" name="search" defaultValue={search} placeholder="Cari project, unit, PIC..." />
-        <button className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm">Cari</button>
-      </form>
+      <DefectSearch initialSearch={search} />
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
         {result.items.length === 0 ? (
