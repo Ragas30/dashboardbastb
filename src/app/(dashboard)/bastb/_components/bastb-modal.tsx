@@ -4,11 +4,13 @@ import { useState, useActionState } from 'react'
 import { Modal } from '@/components/ui/modal'
 import { createBastbAction, updateBastbAction, type BastbActionResult } from '@/app/actions/bastb-actions'
 import type { Bastb } from '@/features/bastbs/types/bastb-types'
+import { useToastStore } from '@/stores/toast-store'
 
 function dateValue(value?: Date) { return value?.toISOString().slice(0, 10) ?? '' }
 function Form({ item, onSuccess, onCancel }: { item?: Bastb; onSuccess: () => void; onCancel: () => void }) {
   const action = item ? updateBastbAction : createBastbAction
-  const [state, formAction, pending] = useActionState<BastbActionResult, FormData>(async (_previous, data) => { const result = await action(data); if (result.ok) onSuccess(); return result }, { ok: true })
+  const addToast = useToastStore((state) => state.add)
+  const [state, formAction, pending] = useActionState<BastbActionResult, FormData>(async (_previous, data) => { const result = await action(data); if (result.ok) { addToast(item ? 'BASTB berhasil diperbarui.' : 'BASTB berhasil ditambahkan.'); onSuccess() } return result }, { ok: true })
   const input = 'mt-2 w-full rounded-lg border border-slate-300 px-3 py-2'
   return <form action={formAction} className="space-y-4">
     {item && <input type="hidden" name="id" value={item.id} />}

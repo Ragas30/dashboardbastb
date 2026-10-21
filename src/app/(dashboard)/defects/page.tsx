@@ -14,6 +14,8 @@ import { DefectImportModal } from './_components/defect-import-modal'
 import { DefectStatusBadge } from '@/components/shared/defect-status-badge'
 import { getBastbs, getAvailableBastbsForDefect, createBastbRepository } from '@/features/bastbs/application'
 import { DefectSearch } from './_components/defect-search'
+import { DataTable, DataTableHead } from '@/components/shared/data-table'
+import { SortableHeader } from '@/components/shared/sortable-header'
 
 const PAGE_SIZE = 10
 
@@ -21,6 +23,8 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
   await requireSupabaseUser()
   const params = await searchParams
   const search = typeof params.search === 'string' ? params.search : undefined
+  const sort = typeof params.sort === 'string' ? params.sort : ''
+  const direction = params.direction === 'desc' ? -1 : 1
   const page = Math.max(1, Number(params.page) || 1)
   const [result, pics, bastbs, availableBastbs] = await Promise.all([
     getDefects(await createDefectRepository(), { search, page, pageSize: PAGE_SIZE }),
@@ -28,6 +32,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
     getBastbs(await createBastbRepository()),
     getAvailableBastbsForDefect(await createBastbRepository()),
   ])
+  result.items.sort((a, b) => sort === 'projectCluster' ? a.projectCluster.localeCompare(b.projectCluster) * direction : sort === 'unit' ? a.unit.localeCompare(b.unit) * direction : sort === 'totalDefect' ? (a.totalDefect - b.totalDefect) * direction : sort === 'status' ? a.status.localeCompare(b.status) * direction : sort === 'targetRepair' ? (a.targetRepair.getTime() - b.targetRepair.getTime()) * direction : (a.updatedAt.getTime() - b.updatedAt.getTime()) * direction)
 
   const buildPageHref = (target: number) => {
     const query = new URLSearchParams()
@@ -55,7 +60,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
 
       <DefectSearch initialSearch={search} />
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <DataTable>
         {result.items.length === 0 ? (
           <div className="flex flex-col items-center gap-4 p-10 text-center text-sm text-slate-500">
             <p>Belum ada data defect.</p>
@@ -63,19 +68,19 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
           </div>
         ) : (
           <table className="w-full min-w-[960px] text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
+            <DataTableHead>
               <tr>
                 <th className="px-5 py-3">No</th>
-                <th className="py-3">Project / Cluster</th>
-                <th className="py-3">Unit</th>
-                <th className="py-3">Total Defect</th>
-                <th className="py-3">PIC</th>
-                <th className="py-3">Status</th>
-                <th className="py-3">Target Repair</th>
-                <th className="py-3">Last Update</th>
+                <th className="py-3"><SortableHeader label="Project / Cluster" field="projectCluster" /></th>
+                <th className="py-3"><SortableHeader label="Unit" field="unit" /></th>
+                <th className="py-3"><SortableHeader label="Total Defect" field="totalDefect" /></th>
+                <th className="py-3"><SortableHeader label="PIC" field="pic" /></th>
+                <th className="py-3"><SortableHeader label="Status" field="status" /></th>
+                <th className="py-3"><SortableHeader label="Target Repair" field="targetRepair" /></th>
+                <th className="py-3"><SortableHeader label="Last Update" field="updatedAt" /></th>
                 <th className="py-3">Action</th>
               </tr>
-            </thead>
+            </DataTableHead>
             <tbody>
               {result.items.map((defect, index) => (
                 <tr className="border-b border-slate-100 last:border-0" key={defect.id}>
@@ -106,7 +111,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
             </tbody>
           </table>
         )}
-      </div>
+      </DataTable>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-500">
         <p>

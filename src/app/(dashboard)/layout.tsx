@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { LogoutButton } from '@/components/shared/logout-button'
 import { MobileNav } from '@/components/shared/mobile-nav'
 import { NavLinks } from '@/components/shared/nav-links'
+import { ToastViewport } from '@/components/shared/toast-viewport'
 
 export const instant = false
 
@@ -13,6 +14,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <LogoutButton />
     </aside>
     <MobileNav footer={<LogoutButton />} />
-    <main className="min-h-screen md:ml-64">{children}</main>
+    <main className="min-h-screen md:ml-64">{children}</main><ToastViewport />
   </div>
 }

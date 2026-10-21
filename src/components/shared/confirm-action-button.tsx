@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react'
 import { Modal } from '@/components/ui/modal'
+import { useToastStore } from '@/stores/toast-store'
 
 type ActionResultLike = { ok: boolean; message?: string } | void
 
@@ -27,6 +28,7 @@ export function ConfirmActionButton({
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const addToast = useToastStore((state) => state.add)
 
   async function handleConfirm() {
     setPending(true)
@@ -40,6 +42,7 @@ export function ConfirmActionButton({
         return
       }
       setOpen(false)
+      addToast('Data berhasil dihapus.')
     } catch {
       setError('Terjadi kesalahan pada sistem. Silakan coba lagi.')
     } finally {

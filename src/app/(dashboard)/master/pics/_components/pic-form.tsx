@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { createPicAction, updatePicAction, type ActionResult } from '@/app/actions/pic-actions'
 import type { Pic } from '@/features/pics/types/pic-types'
+import { useToastStore } from '@/stores/toast-store'
 
 export function PicForm({
   pic,
@@ -14,10 +15,11 @@ export function PicForm({
   onCancel?: () => void
 }) {
   const action = pic ? updatePicAction : createPicAction
+  const addToast = useToastStore((state) => state.add)
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_previous, formData) => {
       const result = await action(formData)
-      if (result.ok) onSuccess?.()
+      if (result.ok) { addToast(pic ? 'PIC berhasil diperbarui.' : 'PIC berhasil ditambahkan.'); onSuccess?.() }
       return result
     },
     { ok: true },

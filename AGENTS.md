@@ -1634,7 +1634,20 @@ Catatan: penambahan modul Storage ini menyimpang dari batasan migration Supabase
 
 ---
 
-# 71. Agent Work Log and Recovery Rules
+# 71. Loading & Skeleton Rules
+
+Setiap route yang melakukan data fetching wajib memiliki `loading.tsx` jika pengguna dapat mengalami jeda render yang terlihat.
+
+Aturan:
+
+- Skeleton harus mengikuti struktur halaman yang sedang dimuat.
+- Gunakan komponen `src/components/ui/skeleton.tsx`.
+- Skeleton tidak boleh menampilkan data palsu atau action yang dapat diklik.
+- Gunakan skeleton untuk header, filter, card, tabel, dan row utama yang relevan.
+- State loading pada Client Component tetap boleh digunakan untuk interaksi setelah halaman tampil.
+- Route baru harus menambahkan `loading.tsx` bersamaan dengan `page.tsx` bila membutuhkan loading state.
+
+# 72. Agent Work Log and Recovery Rules
 
 Setiap coding agent wajib menjaga catatan kerja lokal agar pekerjaan dapat dilanjutkan jika proses terhenti.
 

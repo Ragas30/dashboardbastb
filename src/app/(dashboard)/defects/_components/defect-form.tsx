@@ -5,6 +5,7 @@ import type { Pic } from '@/features/pics/types/pic-types'
 import { createDefectAction, updateDefectAction, type ActionResult } from '@/app/actions/defect-actions'
 import type { Defect } from '@/features/defects/types/defect-types'
 import type { Bastb } from '@/features/bastbs/types/bastb-types'
+import { useToastStore } from '@/stores/toast-store'
 
 function dateValue(value: Date | undefined) {
   return value ? value.toISOString().slice(0, 10) : ''
@@ -27,10 +28,11 @@ export function DefectForm({
   const [cluster, setCluster] = useState(defect?.projectCluster ?? selectedBastb?.cluster ?? '')
   const [unit, setUnit] = useState(defect?.unit ?? selectedBastb?.noUnit ?? '')
   const action = defect ? updateDefectAction : createDefectAction
+  const addToast = useToastStore((state) => state.add)
   const [state, formAction, pending] = useActionState<ActionResult, FormData>(
     async (_previous, formData) => {
       const result = await action(formData)
-      if (result.ok) onSuccess?.()
+      if (result.ok) { addToast(defect ? 'Defect berhasil diperbarui.' : 'Defect berhasil ditambahkan.'); onSuccess?.() }
       return result
     },
     { ok: true },
