@@ -11,7 +11,8 @@ type DefectRow = {
   defect_date: string
   total_defect: number
   pic_id: number
-  target_repair: string
+  target_repair: string | null
+  description?: string | null
   status: Defect['status']
   created_at: string
   updated_at: string
@@ -22,7 +23,7 @@ function mapDefect(row: DefectRow): Defect {
   return {
     id: row.id, bastbId: row.bastb_id ?? undefined, projectCluster: row.project_cluster, unit: row.unit,
     defectDate: new Date(row.defect_date), totalDefect: row.total_defect,
-    picId: row.pic_id, targetRepair: new Date(row.target_repair), status: row.status,
+    picId: row.pic_id, targetRepair: row.target_repair ? new Date(row.target_repair) : undefined, description: row.description ?? undefined, status: row.status,
     createdAt: new Date(row.created_at), updatedAt: new Date(row.updated_at),
     pic: row.master_pics ? { id: row.master_pics.id, name: row.master_pics.name, status: row.master_pics.status } : undefined,
   }
@@ -75,7 +76,7 @@ export class SupabaseDefectRepository implements DefectRepository {
   async create(input: DefectInput) {
     const { data, error } = await this.client.from('defects').insert({
       bastb_id: input.bastbId ?? null, project_cluster: input.projectCluster, unit: input.unit, defect_date: input.defectDate.toISOString().slice(0, 10),
-      total_defect: input.totalDefect, pic_id: input.picId, target_repair: input.targetRepair.toISOString().slice(0, 10), status: input.status,
+      total_defect: input.totalDefect, pic_id: input.picId, target_repair: input.targetRepair?.toISOString().slice(0, 10) ?? null, description: input.description ?? null, status: input.status,
     }).select('*, master_pics!inner(id,name,status)').single()
     if (error) throw new InfrastructureError('Gagal menyimpan defect.', error)
     return mapDefect(data)
@@ -84,7 +85,7 @@ export class SupabaseDefectRepository implements DefectRepository {
   async update(id: number, input: DefectInput) {
     const { data, error } = await this.client.from('defects').update({
       bastb_id: input.bastbId ?? null, project_cluster: input.projectCluster, unit: input.unit, defect_date: input.defectDate.toISOString().slice(0, 10),
-      total_defect: input.totalDefect, pic_id: input.picId, target_repair: input.targetRepair.toISOString().slice(0, 10), status: input.status,
+      total_defect: input.totalDefect, pic_id: input.picId, target_repair: input.targetRepair?.toISOString().slice(0, 10) ?? null, description: input.description ?? null, status: input.status,
     }).eq('id', id).select('*, master_pics!inner(id,name,status)').maybeSingle()
     if (error) throw new InfrastructureError('Gagal memperbarui defect.', error)
     if (!data) throw new NotFoundError('Defect tidak ditemukan.')

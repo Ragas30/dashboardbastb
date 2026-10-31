@@ -20,7 +20,8 @@ export function DefectDetail({ defect }: { defect: Defect }) {
       <DetailField label="Total Defect">{defect.totalDefect}</DetailField>
       <DetailField label="PIC">{defect.pic?.name ?? '-'}</DetailField>
       <DetailField label="Status"><DefectStatusBadge status={defect.status} /></DetailField>
-      <DetailField label="Target Repair">{defect.targetRepair.toLocaleDateString('id-ID')}</DetailField>
+      <DetailField label="Target Repair">{defect.targetRepair?.toLocaleDateString('id-ID') ?? '-'}</DetailField>
+      <DetailField label="Keterangan">{defect.description || '-'}</DetailField>
       <DetailField label="Last Update">{defect.updatedAt.toLocaleString('id-ID')}</DetailField>
     </dl>
   )

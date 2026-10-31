@@ -19,7 +19,8 @@ export type Defect = {
   defectDate: Date
   totalDefect: number
   picId: number
-  targetRepair: Date
+  targetRepair?: Date
+  description?: string
   status: DefectStatus
   createdAt: Date
   updatedAt: Date

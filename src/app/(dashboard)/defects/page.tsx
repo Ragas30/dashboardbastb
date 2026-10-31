@@ -16,6 +16,7 @@ import { getBastbs, getAvailableBastbsForDefect, createBastbRepository } from '@
 import { DefectSearch } from './_components/defect-search'
 import { DataTable, DataTableHead } from '@/components/shared/data-table'
 import { SortableHeader } from '@/components/shared/sortable-header'
+import { sortDefects } from '@/features/defects/application/sort-defects'
 
 const PAGE_SIZE = 10
 
@@ -32,7 +33,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
     getBastbs(await createBastbRepository()),
     getAvailableBastbsForDefect(await createBastbRepository()),
   ])
-  result.items.sort((a, b) => sort === 'projectCluster' ? a.projectCluster.localeCompare(b.projectCluster) * direction : sort === 'unit' ? a.unit.localeCompare(b.unit) * direction : sort === 'totalDefect' ? (a.totalDefect - b.totalDefect) * direction : sort === 'status' ? a.status.localeCompare(b.status) * direction : sort === 'targetRepair' ? (a.targetRepair.getTime() - b.targetRepair.getTime()) * direction : (a.updatedAt.getTime() - b.updatedAt.getTime()) * direction)
+  sortDefects(result.items, sort, direction as 1 | -1)
 
   const buildPageHref = (target: number) => {
     const query = new URLSearchParams()
@@ -77,6 +78,7 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
                 <th className="py-3"><SortableHeader label="PIC" field="pic" /></th>
                 <th className="py-3"><SortableHeader label="Status" field="status" /></th>
                 <th className="py-3"><SortableHeader label="Target Repair" field="targetRepair" /></th>
+                <th className="py-3">Keterangan</th>
                 <th className="py-3"><SortableHeader label="Last Update" field="updatedAt" /></th>
                 <th className="py-3">Action</th>
               </tr>
@@ -90,7 +92,8 @@ export default async function DefectsPage({ searchParams }: { searchParams: Prom
                   <td>{defect.totalDefect}</td>
                   <td>{defect.pic?.name ?? '-'}</td>
                   <td><DefectStatusBadge status={defect.status} /></td>
-                  <td>{defect.targetRepair.toLocaleDateString('id-ID')}</td>
+                  <td>{defect.targetRepair?.toLocaleDateString('id-ID') ?? '-'}</td>
+                  <td className="max-w-xs truncate" title={defect.description ?? undefined}>{defect.description || '-'}</td>
                   <td>{defect.updatedAt.toLocaleDateString('id-ID')}</td>
                   <td className="py-4">
                     <div className="flex items-center gap-3">

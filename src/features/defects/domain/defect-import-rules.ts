@@ -33,6 +33,6 @@ function buildUtcDate(year: number, month: number, day: number): Date | null {
   return date
 }
 
-export function formatDefectDate(date: Date): string {
-  return date.toISOString().slice(0, 10)
+export function formatDefectDate(date?: Date): string {
+  return date ? date.toISOString().slice(0, 10) : ''
 }

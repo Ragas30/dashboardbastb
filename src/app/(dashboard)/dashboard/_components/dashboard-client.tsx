@@ -33,7 +33,7 @@ function normalizeDashboardData(data: DashboardData): DashboardData {
     defects: data.defects.map((defect) => ({
       ...defect,
       defectDate: new Date(defect.defectDate),
-      targetRepair: new Date(defect.targetRepair),
+      targetRepair: defect.targetRepair ? new Date(defect.targetRepair) : undefined,
       createdAt: new Date(defect.createdAt),
       updatedAt: new Date(defect.updatedAt),
     })),
@@ -50,7 +50,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
     () =>
       data.defects
         .filter((defect) => defect.status !== "COMPLETED")
-        .sort((a, b) => a.targetRepair.getTime() - b.targetRepair.getTime())
+        .sort((a, b) => (a.targetRepair?.getTime() ?? Number.MAX_SAFE_INTEGER) - (b.targetRepair?.getTime() ?? Number.MAX_SAFE_INTEGER))
         .slice(0, 8),
     [data.defects],
   );
@@ -157,7 +157,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
         {activeDefects.length === 0 ? (
           <p className="text-sm text-slate-500">Tidak ada defect aktif.</p>
         ) : (
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
             <DataTableHead>
               <tr>
                 <th className="py-3">Cluster</th>
@@ -166,6 +166,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
                 <th className="py-3">Status</th>
                 <th className="py-3">PIC</th>
                 <th className="py-3">Target Repair</th>
+                <th className="py-3">Keterangan</th>
               </tr>
             </DataTableHead>
             <tbody>
@@ -176,10 +177,11 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
                   <td className="py-3">{defect.totalDefect}</td>
                   <td className="py-3">{DEFECT_STATUS_LABELS[defect.status]}</td>
                   <td className="py-3 text-center">{defect.pic?.name ?? "-"}</td>
-                  <td className={defect.targetRepair < today ? "font-semibold text-red-600" : "text-slate-600"}>
-                    {defect.targetRepair.toLocaleDateString("id-ID")}
-                    {defect.targetRepair < today ? " · Terlambat" : ""}
+                  <td className={defect.targetRepair && defect.targetRepair < today ? "font-semibold text-red-600" : "text-slate-600"}>
+                    {defect.targetRepair?.toLocaleDateString("id-ID") ?? "-"}
+                    {defect.targetRepair && defect.targetRepair < today ? " · Terlambat" : ""}
                   </td>
+                  <td className="max-w-xs truncate py-3" title={defect.description ?? undefined}>{defect.description || "-"}</td>
                 </tr>
               ))}
             </tbody>

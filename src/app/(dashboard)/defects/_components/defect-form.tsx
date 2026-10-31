@@ -42,6 +42,7 @@ export function DefectForm({
 
   return (
     <form action={formAction} className="space-y-5">
+      {defect && <input type="hidden" name="id" value={defect.id} />}
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="text-sm font-medium text-slate-600 sm:col-span-2">
           BASTB
@@ -81,7 +82,11 @@ export function DefectForm({
         </label>
         <label className="text-sm font-medium text-slate-600">
           Target Repair
-          <input type="date" name="targetRepair" required defaultValue={dateValue(defect?.targetRepair)} className={inputClass} />
+          <input type="date" name="targetRepair" defaultValue={dateValue(defect?.targetRepair)} className={inputClass} />
+        </label>
+        <label className="text-sm font-medium text-slate-600 sm:col-span-2">
+          Keterangan
+          <textarea name="description" defaultValue={defect?.description ?? ''} maxLength={1000} rows={3} className={inputClass} />
         </label>
         <label className="text-sm font-medium text-slate-600 sm:col-span-2">
           Status
